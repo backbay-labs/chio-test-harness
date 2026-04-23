@@ -1,0 +1,35 @@
+{
+  "name": "@chio/test-harness",
+  "version": "0.2.0",
+  "description": "Shared live-daemon harness consumed by the chio plugin smoke tests: boots real chio trust-plane and MCP edge subprocesses plus a minimal hello-mcp reference server. No mocks.",
+  "type": "module",
+  "private": false,
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bb-connor/chio-test-harness.git"
+  },
+  "keywords": [
+    "chio",
+    "mcp",
+    "harness",
+    "smoke-tests",
+    "daemon",
+    "integration"
+  ],
+  "files": [
+    "bin",
+    "policy",
+    "hello-mcp",
+    "scripts",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "prep-release": "bash scripts/prep-release.sh",
+    "verify-release": "bash scripts/verify-release.sh"
+  }
+}

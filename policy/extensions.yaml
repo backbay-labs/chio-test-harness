@@ -1,0 +1,40 @@
+hushspec: "0.1.0"
+name: chio-test-harness-extensions
+description: |
+  Policy that exercises only the extensions.chio.* slot so plugin
+  smoke tests can assert the bridge surfaces these as passthrough
+  without the chio kernel rejecting them.
+
+rules:
+  tool_access:
+    enabled: true
+    default: block
+    allow: [echo]
+
+extensions:
+  chio:
+    market_hours:
+      tz: "UTC"
+      open: "00:00"
+      close: "23:59"
+      days: [mon, tue, wed, thu, fri, sat, sun]
+    signing:
+      algo: ed25519
+      required: true
+      key_ref: "local://dev-harness"
+    k8s_namespaces:
+      allow: [dev]
+      human_in_loop: [staging]
+      deny: [prod, kube-system]
+    rollback:
+      on_guard_fail: true
+      on_timeout: true
+      strategy: "last-known-good"
+    human_in_loop:
+      approve_when:
+        - "tool == 'wire_transfer'"
+        - "args.usd > 10000"
+      approvers:
+        n: 2
+        of: [ops-lead, security-lead, finance-lead]
+        timeout_seconds: 300

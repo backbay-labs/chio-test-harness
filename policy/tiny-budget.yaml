@@ -1,0 +1,36 @@
+hushspec: "0.1.0"
+name: chio-test-harness-tiny-budget
+description: |
+  Same shape as canonical.yaml but with a deliberately tiny velocity window
+  to force rule.velocity budget exhaustion on 2-3 iterations of paid_action({usd:50}).
+  Drives the "cancelled on budget" verification line in VERIFY.md.
+
+rules:
+  forbidden_paths:
+    enabled: true
+    patterns:
+      - "/**"
+
+  path_allowlist:
+    enabled: true
+    read: ["/tmp/chio-harness/**"]
+    write: ["/tmp/chio-harness/**"]
+    patch: ["/tmp/chio-harness/**"]
+
+  tool_access:
+    enabled: true
+    default: block
+    allow:
+      - echo
+      - paid_action
+
+  # Force-exhaust on the 4th iteration via invocation counter only.
+  # (max_spend_per_window requires grants to carry
+  # max_cost_per_invocation, which chio check's synthetic grant does
+  # not, so it is omitted here even though the spec nominally targets
+  # spend-window exhaustion.)
+  velocity:
+    enabled: true
+    max_invocations_per_window: 3
+    window_secs: 3600
+    burst_factor: 1.0

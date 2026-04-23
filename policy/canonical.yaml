@@ -1,0 +1,88 @@
+hushspec: "0.1.0"
+name: chio-test-harness-canonical
+description: |
+  HushSpec 0.1.0 policy exercised by the chio smoke-test harness.
+  Exercises every guard the downstream plugin smoke tests depend on:
+    - forbidden_paths (delete_file against /** must deny)
+    - path_allowlist (writes only under /tmp/chio-harness/**)
+    - egress (block-by-default with one allow stanza)
+    - tool_access (default=block with explicit allow list)
+    - rules.velocity (loose budget, low fire rate)
+    - rules.human_in_loop (approve_above: 5000 minor units = $50.00)
+    - extensions.chio.* (market_hours, signing, k8s_namespaces, rollback)
+
+rules:
+  forbidden_paths:
+    enabled: true
+    patterns:
+      - "/**"
+
+  path_allowlist:
+    enabled: true
+    read:
+      - "/tmp/chio-harness/**"
+      - "/workspace/**"
+    write:
+      - "/tmp/chio-harness/**"
+    patch:
+      - "/tmp/chio-harness/**"
+
+  egress:
+    enabled: true
+    default: block
+    allow:
+      - "https://api.example.com/*"
+
+  tool_access:
+    enabled: true
+    default: block
+    allow:
+      - echo
+      - paid_action
+
+  secret_patterns:
+    enabled: true
+
+  velocity:
+    enabled: true
+    max_invocations_per_window: 100
+    # Note: max_spend_per_window requires max_cost_per_invocation on
+    # every tool grant; not compatible with default chio check grant
+    # shape. See policy/tiny-budget.yaml for the spend-limit path,
+    # which drives HITL exhaustion via chio check iterations.
+    window_secs: 3600
+    burst_factor: 1.0
+
+  # Note on approve_above: chio compiles `approve_above` into a
+  # `RequireApprovalAbove` constraint on every tool grant, which the
+  # kernel fail-closes when a governed_intent is absent. Smoke tests
+  # that drive `chio mcp serve-http` with a bare tool-call path must
+  # therefore use `require_confirmation` globs only. Policies that
+  # want to exercise the USD-threshold code path should point at
+  # `policy/human-in-loop.yaml` and build a governed_intent request
+  # via chio-bridge (not yet wired into this canonical).
+  human_in_loop:
+    enabled: true
+    require_confirmation:
+      - "wire_transfer"
+    timeout_seconds: 300
+    on_timeout: deny
+
+extensions:
+  chio:
+    market_hours:
+      tz: "America/New_York"
+      open: "09:30"
+      close: "16:00"
+      days: [mon, tue, wed, thu, fri]
+    signing:
+      algo: ed25519
+      required: true
+    k8s_namespaces:
+      allow: [dev, staging]
+      human_in_loop: [prod]
+      deny: [kube-system]
+    rollback:
+      on_guard_fail: true
+      on_timeout: false
+      strategy: "last-known-good"

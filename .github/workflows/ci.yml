@@ -1,0 +1,76 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  self-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout chio-test-harness
+        uses: actions/checkout@v4
+        with:
+          path: chio-test-harness
+
+      - name: Checkout arc (chio source)
+        uses: actions/checkout@v4
+        with:
+          # Placeholder: replace owner/arc once the GitHub org is live.
+          repository: owner/arc
+          path: arc
+          ref: main
+
+      - name: Setup chio
+        uses: owner/chio-ci-actions/setup-chio@v0.1.0
+        with:
+          mode: build
+          arc-path: arc
+
+      - name: Install hello-mcp deps
+        working-directory: chio-test-harness/hello-mcp
+        run: bun install --frozen-lockfile
+
+      - name: Start daemons
+        working-directory: chio-test-harness
+        run: bash bin/start.sh
+
+      - name: Verify READY (idempotent re-invoke)
+        working-directory: chio-test-harness
+        run: |
+          out="$(bash bin/start.sh)"
+          echo "${out}"
+          grep -q READY <<<"${out}" || exit 1
+
+      - name: Probe env.sh
+        working-directory: chio-test-harness
+        run: |
+          # shellcheck disable=SC1091
+          source bin/env.sh
+          : "${CHIO_TRUST_URL:?}"
+          : "${CHIO_MCP_URL:?}"
+          : "${CHIO_TOKEN:?}"
+          : "${CHIO_POLICY:?}"
+          echo "harness env OK: trust=${CHIO_TRUST_URL} mcp=${CHIO_MCP_URL}"
+
+      - name: Health check
+        working-directory: chio-test-harness
+        run: |
+          curl -fsS "http://127.0.0.1:8940/health" >/dev/null
+          echo "trust plane healthy"
+
+      - name: Stop daemons
+        if: always()
+        working-directory: chio-test-harness
+        run: bash bin/stop.sh || true
+
+      - name: Upload var/ on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: harness-var
+          path: chio-test-harness/var
+          if-no-files-found: ignore

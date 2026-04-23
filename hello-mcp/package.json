@@ -1,0 +1,14 @@
+{
+  "name": "chio-harness-hello-mcp",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Minimal stdio MCP server for the chio smoke-test harness: echo, delete_file, paid_action.",
+  "main": "server.mjs",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "0.6.0"
+  }
+}
