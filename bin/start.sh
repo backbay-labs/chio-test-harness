@@ -10,10 +10,13 @@
 #
 # Exit codes:
 #   0  both services healthy and `READY` printed
-#   1  dependency missing (chio binary, node, jq)
+#   1  dependency missing (chio binary, node, Python 3, jq)
 #   2  health timeout; logs under ./var/ retained for post-mortem
 
 set -euo pipefail
+umask 077
+
+command -v python3 >/dev/null 2>&1 || { echo "start.sh: Python 3 is required for authenticated readiness" >&2; exit 1; }
 
 HARNESS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${HARNESS_DIR}"
@@ -90,45 +93,66 @@ fi
 TOKEN="$(cat "${TOKEN_FILE}")"
 
 # ----- Trust plane -------------------------------------------------------
-# chio-cli expects separate auth DBs; letting it pick defaults is fine for
-# an ephemeral harness.
+# The trust process owns durable admission and shared authority/receipts.
+# Each MCP participant keeps only its own durable kernel identity.
 RECEIPT_DB="${VAR_DIR}/receipts.sqlite"
-REVOCATION_DB="${VAR_DIR}/revocations.sqlite"
 AUTHORITY_DB="${VAR_DIR}/authority.sqlite"
-BUDGET_DB="${VAR_DIR}/budget.sqlite"
+ADMISSION_DB="${VAR_DIR}/admission.sqlite"
+MCP_SESSION_DB="${VAR_DIR}/mcp-sessions.sqlite"
 # Passport lifecycle registry — required for /v1/passport/statuses publish
 # flows to return anything other than HTTP 409. Wave 2 bridge unlocks
 # bond() against this registry.
 PASSPORT_STATUSES_FILE="${VAR_DIR}/passport-statuses.json"
 
-nohup "${CHIO}" \
+CHIO_TRUST_SERVICE_TOKEN="${TOKEN}" nohup "${CHIO}" \
   --receipt-db "${RECEIPT_DB}" \
-  --revocation-db "${REVOCATION_DB}" \
   --authority-db "${AUTHORITY_DB}" \
-  --budget-db "${BUDGET_DB}" \
+  --session-db "${ADMISSION_DB}" \
   trust serve \
     --listen "${TRUST_ADDR}" \
-    --service-token "${TOKEN}" \
     --passport-statuses-file "${PASSPORT_STATUSES_FILE}" \
     --allow-local-peer-urls \
   >>"${TRUST_LOG}" 2>&1 &
 TRUST_PID=$!
 echo "${TRUST_PID}" > "${TRUST_PID_FILE}"
 
+# The MCP participant reconciles against the single trust admission owner.
+# Wait for that owner before starting a participant; do not use split local
+# budget/revocation databases or disable durable admission to hide a mismatch.
+CHIO_HARNESS_TOKEN="${TOKEN}" CHIO_HARNESS_TRUST_ADDR="${TRUST_ADDR}" python3 - <<'PY'
+import os
+import time
+import urllib.error
+import urllib.request
+
+request = urllib.request.Request(
+    "http://" + os.environ["CHIO_HARNESS_TRUST_ADDR"] + "/health",
+    headers={"Authorization": "Bearer " + os.environ["CHIO_HARNESS_TOKEN"]},
+)
+deadline = time.monotonic() + 30
+while time.monotonic() < deadline:
+    try:
+        with urllib.request.urlopen(request, timeout=2) as response:
+            if response.status == 200:
+                break
+    except (urllib.error.URLError, TimeoutError):
+        pass
+    time.sleep(0.2)
+else:
+    raise SystemExit("trust admission owner did not become ready")
+PY
+
 # ----- MCP edge ---------------------------------------------------------
 # The edge wraps our local hello-mcp stdio server and gates every call
 # through the specified policy.
-nohup "${CHIO}" \
-  --receipt-db "${RECEIPT_DB}" \
-  --revocation-db "${REVOCATION_DB}" \
-  --authority-db "${AUTHORITY_DB}" \
-  --budget-db "${BUDGET_DB}" \
+CHIO_AUTH_TOKEN="${TOKEN}" CHIO_CONTROL_TOKEN="${TOKEN}" nohup "${CHIO}" \
+  --session-db "${MCP_SESSION_DB}" \
+  --control-url "http://${TRUST_ADDR}" \
   mcp serve-http \
     --listen "${MCP_ADDR}" \
     --policy "${POLICY}" \
     --server-id hello-mcp \
     --server-name "chio-harness-hello-mcp" \
-    --auth-token "${TOKEN}" \
     -- node "${HARNESS_DIR}/hello-mcp/server.mjs" \
   >>"${MCP_LOG}" 2>&1 &
 MCP_PID=$!

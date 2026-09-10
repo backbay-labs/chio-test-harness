@@ -9,17 +9,17 @@ The harness boots real chio subprocesses:
 
 | Service     | Port | Command                                                        |
 |-------------|------|----------------------------------------------------------------|
-| trust plane | 8940 | `chio trust serve --listen 127.0.0.1:8940 --service-token ...` |
+| trust plane | 8940 | `CHIO_TRUST_SERVICE_TOKEN=... chio --session-db ... trust serve` |
 | MCP edge    | 8931 | `chio mcp serve-http ... -- node hello-mcp/server.mjs`         |
 
-No mocks. Every call to the harness exercises the same binaries a
-production `chio bond` deployment would hit.
+The harness exercises real kernel processes. Its API compatibility tests do not
+establish containment of any agent host or replace required-host acceptance.
 
 ## Prerequisites
 
 - `chio` binary on `PATH`, or set `CHIO_BIN=/path/to/chio`. The
   harness falls back to `../arc/target/release/chio` if present.
-- `node >= 22`.
+- `node >= 22`, Python 3, `jq`, and OpenSSL.
 - `bun` (only needed to install `hello-mcp/` dependencies).
 - Ports **8931** and **8940** free.
 
@@ -132,3 +132,29 @@ See `/tmp/chio-debate/SMOKE_HARNESS_VERIFY.md` for the reference run.
 [![ci](https://github.com/owner/chio-test-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/owner/chio-test-harness/actions/workflows/ci.yml)
 
 Workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml). Runs lint/typecheck (non-blocking in Wave 5.1), unit tests, and a chio-backed smoke pass. Swap `owner/...` once the GitHub org is live.
+
+## Durable owner compatibility
+
+The candidate kernel requires one durable admission owner. `start.sh` launches
+the trust process with `var/admission.sqlite`, `var/authority.sqlite`, and
+`var/receipts.sqlite`. It waits for authenticated trust readiness before starting
+the MCP participant with `--control-url` and its own
+`var/mcp-sessions.sqlite` identity. Split local budget/revocation stores must not
+be combined with this durable owner, and the participant must not combine local
+receipt/authority flags with the remote control URL.
+
+Fixture credentials are private files under `var/` and are passed through child
+environments, not command arguments. Run in a disposable clone/profile and set
+`CHIO_BIN` to the exact qualified artifact; the version string alone is not an
+artifact identity. Do not point delete tests at system files or normal user
+state. Create a disposable sentinel, ask the kernel to deny deletion, and check
+the original bytes independently. This proves the observed resource survived;
+a returned denial alone does not prove prevention.
+
+Startup was verified on 2026-09-09 using source
+`d8c5f53705173e614a853bad6c0a85acfdf1212b` and kernel SHA-256
+`33dd1dea21a4ca5ecddeab4f30f6b06b0b90c513f0987aef552b0633d9da1e25`.
+The trust and MCP services reached readiness, explicit echo execution returned
+request-bound signed evidence, and receipt queries returned that work. Remaining
+consumer API compatibility failures are independent release blockers; this
+startup repair is not full bridge or host acceptance.
