@@ -179,6 +179,14 @@ python3 "$CHIO_BUNDLE/resource-owner/prepare-session.py" \
   --bridge "$CHIO_INSTALL/bridge/node_modules/@chio/bridge"
 ```
 
+Preparation first waits up to 60 seconds for the retained owner's trusted signer,
+checking its private state, selected kernel hash, live process and recorded
+session database/listener. No session directory or network request is created
+before that check succeeds. `--readiness-timeout-seconds` selects another bounded
+deadline up to 300 seconds. A timeout or changed/dead owner fails closed without
+an automatic preparation retry. A persistent signer after restart is not proof
+of transport readiness; the subsequent authenticated MCP step must also succeed.
+
 Preparation prints a private gateway config path. It pins the trusted kernel
 signer and actual subject, session, capability and resource, then exchanges the
 operator authority for a delegated 15-minute session credential and exactly four

@@ -30,7 +30,8 @@ selected binary as `chio`.
 {
   "prior": "/absolute/retained-predecessor-bundle",
   "claude": "/absolute/selected-claude-archive-directory",
-  "kernel": "/absolute/final-kernel-directory"
+  "kernel": "/absolute/final-kernel-directory",
+  "owner-source": "/absolute/selected-public-Chio-source"
 }
 ```
 
@@ -89,9 +90,30 @@ timestamps and numeric ownership, then rereads every archived file against its
 selected checksum. It prints the resulting archive SHA256 and size. It refuses
 an existing output and still makes no publication or acceptance claim.
 
-`OPERATOR.md` becomes the root bundle README. `RESOURCE-OWNER.md` replaces the
-predecessor's stale build/version instructions. The remaining resource-owner
-files are copied byte-for-byte from the explicit predecessor selection. The
+For a cold local installation, first verify the archive's recorded SHA256.
+For a public release, also complete the separate publisher/provenance check.
+Use the system tar command to extract into a fresh private directory while
+preserving the archived read-only modes, then run the verifier from that copy:
+
+```sh
+mkdir -m 700 /absolute/new-extracted-candidate
+tar -xzf /absolute/selected-candidate.tar.gz -C /absolute/new-extracted-candidate
+python3 /absolute/new-extracted-candidate/verify.py verify-bundle \
+  --bundle /absolute/new-extracted-candidate --images
+/absolute/new-extracted-candidate/bin/chio --version
+```
+
+The recorded Python 3.14 default extraction attempt added owner-write permission
+to archived files and failed the immutable-mode check. That failed copy remains
+retained. The system tar extraction procedure above passed against the actual
+local candidate. A verifier refusal must be resolved before installing packages
+or launching an owner; never disable the mode check to label an extraction valid.
+
+`OPERATOR.md` becomes the root bundle README. `RESOURCE-OWNER.md` is the selected
+Chio resource-owner README. The corrected `prepare-session.py` comes from the
+explicit public source revision and checksum named in the template; `owner-source`
+is needed only during assembly. All other resource-owner files are copied
+byte-for-byte from the explicit predecessor selection. The
 assembler records their hashes individually. It does not modify runtime plugin
 archives or automatically replace a host's embedded bridge with another build.
 

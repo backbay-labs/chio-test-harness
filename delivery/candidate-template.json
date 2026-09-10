@@ -240,7 +240,9 @@
       "sha256": null,
       "bytes": null,
       "input": "instructions",
-      "sourcePath": "RESOURCE-OWNER.md"
+      "sourcePath": "RESOURCE-OWNER.md",
+      "sourceRevision": "3374dba0c1537e933e8f3e1074264b96668e5825",
+      "sourceRepository": "https://github.com/backbay-labs/chio"
     },
     {
       "component": "resource-owner",
@@ -367,10 +369,12 @@
     {
       "component": "resource-owner",
       "path": "resource-owner/prepare-session.py",
-      "sha256": "662986b01bca757163b48e2b5179b3a3a58d7f619950dbc16c43c6c09deba863",
-      "bytes": 1816,
-      "input": "prior",
-      "sourcePath": "resource-owner/prepare-session.py"
+      "sha256": "efb4cbde3d032a461d804dc40e2bae32e179219f95ecddf0d112e37cfa14dd6c",
+      "bytes": 10369,
+      "input": "owner-source",
+      "sourcePath": "integrations/required-agents/prepare-session.py",
+      "sourceRevision": "3374dba0c1537e933e8f3e1074264b96668e5825",
+      "sourceRepository": "https://github.com/backbay-labs/chio"
     },
     {
       "component": "instructions",
