@@ -1,0 +1,79 @@
+{
+  "recordedAt": "2026-09-10T06:48:35.318037+00:00",
+  "sourceFileSha256": {
+    "delivery/bundle.py": "e798e92a4774b949abcaf008e2209d038d208358c5ea76fa131ea1b50c86168e",
+    "delivery/candidate-template.json": "cbfaab7f509ce46516bfbfca427526f0ef220bc6bc2105635f9e91aa93abb761",
+    "delivery/OPERATOR.md": "3fea565594dba2f07941e8f64315c3df194d13c33648857e9a2fec7912c3fddc",
+    "delivery/RESOURCE-OWNER.md": "17b4bda248f1c4dbb57a18cf7f003b3205d7e7982fed2e9ad233cbd8e1c7b330",
+    "delivery/README.md": "c0215e9e46fe2189e3bd80f73a4de59cf6762a32ba40a5261cd7c98c6b291fe5",
+    "delivery/tests/test_bundle.py": "501295ba549f9ee369981e6b95cf3ef24a0f9c3bbc75b0481d63e38d6b6c158e",
+    ".github/workflows/ci.yml": "82f6178e3e3f93b554fc6d1ddba55c598694f9b25c1a905c0b9194ca775b303e"
+  },
+  "checks": [
+    {
+      "case": "known-inputs",
+      "command": [
+        "python3",
+        "delivery/bundle.py",
+        "verify-inputs",
+        "--inputs",
+        "PRIVATE_INPUT_ROOT_MAP",
+        "--images"
+      ],
+      "exitCode": 2,
+      "expectedExitCode": 2
+    },
+    {
+      "case": "integrity-tests",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "delivery/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0
+    },
+    {
+      "case": "workflow-lint",
+      "command": [
+        "actionlint",
+        ".github/workflows/ci.yml"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0
+    },
+    {
+      "case": "diff-check",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "expectedExitCode": 0
+    }
+  ],
+  "verifiedKnownEntries": 47,
+  "pendingArtifacts": [
+    "bin/chio"
+  ],
+  "predecessorManifestSha256": "e3fff0a43f186500909f83265b92ddd40f6b80c5507dd11a71ecf62cce7b65ce",
+  "predecessorEntries": 48,
+  "selectedClaude": {
+    "component": "claude",
+    "path": "packages/chio-claude-code-plugin-0.3.1-rc.1.tgz",
+    "sha256": "1258385647d228ebeed32662091ed721aeda3b60450cabae480ca0d4292fbe0a",
+    "bytes": 4954963,
+    "sourceRevision": "16624ede65015be091e91b7c29213425d5e2517e",
+    "input": "claude",
+    "sourcePath": "chio-claude-code-plugin-0.3.1-rc.1.tgz",
+    "version": "0.3.1-rc.1"
+  },
+  "finalKernel": null,
+  "publicRelease": null,
+  "hostAcceptance": "None claimed. These are delivery integrity and local operator bridge installation observations only. The administrative revocation snippet awaits execution against the final kernel in the host lifecycle lane."
+}

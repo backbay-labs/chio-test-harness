@@ -1,5 +1,11 @@
 # chio-test-harness
 
+The required six-host program's pending compatible delivery has a separate
+[manifest, assembly procedure and operator runbook](delivery/README.md). That
+procedure uses explicit artifact hashes and ships its own verifier and resource
+owner helpers. The legacy API smoke harness below and its sibling-checkout
+fallback are not its installation or acceptance path.
+
 Shared live-daemon harness consumed by the chio plugin smoke tests
 (ST.2.x: `chio-claude-code-plugin`, `chio-open-code-plugin`,
 `chio-codex-plugin`) and the `@chio/bridge` live integration test

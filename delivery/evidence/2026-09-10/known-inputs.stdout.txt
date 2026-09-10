@@ -1,0 +1,9 @@
+{
+  "verifiedEntries": 47,
+  "pendingArtifacts": [
+    "bin/chio"
+  ],
+  "completeAssembly": false,
+  "acceptance": "unresolved",
+  "publication": null
+}
