@@ -1,10 +1,23 @@
-# Required-agent delivery preparation
+# Required-agent bundle assembly
 
-This directory assembles a new immutable candidate from explicit, checksummed
-inputs. It does not publish artifacts, replace the retained 2026-09-09 selection,
-or accept a host. All six hosts remain mandatory. The compatible public release,
-final artifact qualification and Cursor's server enforcement contract remain
-unresolved.
+[Harness overview](../README.md) · [Operator runbook](OPERATOR.md) ·
+[Resource owner](RESOURCE-OWNER.md) · [Candidate template](candidate-template.json)
+
+Build a portable installation from exact, checksummed kernel, adapter, SDK and
+image inputs. The assembler produces an immutable directory, a complete manifest,
+a standalone verifier and an optional deterministic archive. It verifies files
+without starting a kernel, host or Docker service.
+
+This guide is for release operators who already have the selected artifacts.
+The template does not download missing inputs or publish a release. Every output
+retains unresolved publication and per-host acceptance; the compatible public
+release, final artifact qualification and Cursor's server enforcement contract
+remain separate gates. All six hosts are mandatory.
+
+The [local documentation successor record](evidence/2026-09-10/static-docs-successor/README.md)
+identifies one assembled and cold-verified candidate. Its results belong to that
+exact archive. A new selection, including the eventual hosted kernel build,
+needs its own recorded qualification.
 
 `candidate-template.json` selects the retained packages, wheels and OCI images,
 the corrected Claude `0.3.1-rc.1` archive, and the pending macOS arm64 kernel
@@ -46,7 +59,7 @@ Image verification reads the saved OCI archive, checks every blob digest and
 requires its top-level descriptor to select the recorded immutable image ID.
 It does not contact Docker or an image registry.
 
-## Bind and assemble after final qualification
+## Bind and assemble a selected candidate
 
 The release owner supplies a `kernel-binding.json` containing the actual final
 binary's recorded identity. The example below is a schema, not valid input:

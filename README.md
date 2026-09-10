@@ -1,166 +1,203 @@
-# chio-test-harness
+<p align="center">
+  <picture>
+    <source media="(max-width: 600px)" srcset="docs/assets/readme-hero-mobile.svg" />
+    <img src="docs/assets/readme-hero.svg" alt="Chio Test Harness: real services, explicit artifacts, reproducible checks" width="960" />
+  </picture>
+</p>
 
-The required six-host program's pending compatible delivery has a separate
-[manifest, assembly procedure and operator runbook](delivery/README.md). That
-procedure uses explicit artifact hashes and ships its own verifier and resource
-owner helpers. The legacy API smoke harness below and its sibling-checkout
-fallback are not its installation or acceptance path.
+<p align="center">
+  <a href="https://github.com/backbay-labs/chio-test-harness/actions/workflows/ci.yml"><img src="https://github.com/backbay-labs/chio-test-harness/actions/workflows/ci.yml/badge.svg" alt="Source CI" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square" alt="Apache-2.0 license" /></a>
+</p>
 
-Shared live-daemon harness consumed by the chio plugin smoke tests
-(ST.2.x: `chio-claude-code-plugin`, `chio-open-code-plugin`,
-`chio-codex-plugin`) and the `@chio/bridge` live integration test
-(`bun run test:live`).
+<p align="center"><strong>Test against real Chio services. Assemble delivery from exact artifacts.</strong></p>
 
-The harness boots real chio subprocesses:
+<p align="center">
+  <a href="#start-a-local-harness">Quickstart</a>&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+  <a href="#how-it-works">Architecture</a>&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+  <a href="#test-fixtures">Fixtures</a>&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+  <a href="#assemble-a-candidate-bundle">Delivery</a>&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+  <a href="#development">Development</a>
+</p>
 
-| Service     | Port | Command                                                        |
-|-------------|------|----------------------------------------------------------------|
-| trust plane | 8940 | `CHIO_TRUST_SERVICE_TOKEN=... chio --session-db ... trust serve` |
-| MCP edge    | 8931 | `chio mcp serve-http ... -- node hello-mcp/server.mjs`         |
+Chio Test Harness gives integration authors a local trust service, a policy-gated
+MCP endpoint, and a small tool server for testing clients against the real kernel.
+It starts the processes, checks readiness, and exports the endpoints and fixture
+credentials your tests need.
 
-The harness exercises real kernel processes. Its API compatibility tests do not
-establish containment of any agent host or replace required-host acceptance.
+Release operators can also use the [candidate bundle assembler](delivery/README.md)
+to collect selected kernels, adapters, SDKs, images and owner helpers into a
+checksummed installation with its own verifier.
 
-## Prerequisites
+**Scope:** the service quickstart below uses the exact kernel source selected by
+this repository's CI. Required-agent bundles remain qualification candidates;
+public release and per-host acceptance are separate gates. A healthy service or
+successful API test does not establish containment of an agent host.
 
-- `chio` binary on `PATH`, or set `CHIO_BIN=/path/to/chio`. The
-  harness falls back to `../arc/target/release/chio` if present.
-- `node >= 22`, Python 3, `jq`, and OpenSSL.
-- `bun` (only needed to install `hello-mcp/` dependencies).
-- Ports **8931** and **8940** free.
+## Start a local harness
 
-## First-time install
+Use Bash on Linux or macOS, Node.js 22 or newer, Bun, Python 3, curl and OpenSSL.
+The default loopback ports **8940** and **8931** must be free. The pinned CI setup
+uses Node.js 22.19.0 and Bun 1.3.3; see the [workflow](.github/workflows/ci.yml).
+
+Run these commands in a Bash session. A fresh clone keeps this test's state and
+logs separate from any existing harness:
 
 ```bash
-cd chio-test-harness/hello-mcp && bun install
+CHIO_TEST_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/chio-harness.XXXXXX")"
+git clone https://github.com/backbay-labs/chio-test-harness.git "$CHIO_TEST_ROOT/harness"
+cd "$CHIO_TEST_ROOT/harness"
+(cd hello-mcp && bun install --frozen-lockfile --ignore-scripts)
 ```
 
-## Smoke-test-agent usage
+Set `CHIO_BIN` to an absolute path to a compatible kernel. The service baseline
+in CI is Chio source `d8c5f53705173e614a853bad6c0a85acfdf1212b`. It supports the
+durable trust owner and remote-control MCP participant used by `bin/start.sh`.
+A version string alone does not identify that binary. Use a build from that
+revision or a separately qualified compatible artifact.
+
+<details>
+<summary><strong>Build the API-harness baseline from public source</strong></summary>
+
+Install Rust through rustup and the kernel's build prerequisites: a C toolchain,
+Protobuf (`protoc`), pkg-config and OpenSSL development libraries. The pinned
+checkout selects Rust 1.94.1. Its [build instructions](https://github.com/backbay-labs/chio/tree/d8c5f53705173e614a853bad6c0a85acfdf1212b)
+and this repository's [Linux CI recipe](.github/workflows/ci.yml) provide context.
 
 ```bash
-# 1. Bring the harness up. Prints READY when both services are healthy.
-bash bin/start.sh
+git init "$CHIO_TEST_ROOT/kernel"
+git -C "$CHIO_TEST_ROOT/kernel" fetch --no-tags --depth=1 \
+  https://github.com/backbay-labs/chio.git d8c5f53705173e614a853bad6c0a85acfdf1212b
+git -C "$CHIO_TEST_ROOT/kernel" checkout --detach FETCH_HEAD
+(cd "$CHIO_TEST_ROOT/kernel" && cargo build --locked -p chio-cli --bin chio)
+export CHIO_BIN="$CHIO_TEST_ROOT/kernel/target/debug/chio"
+```
 
-# 2. Source the env vars every smoke test expects.
-source bin/env.sh
+This is the historical API-harness baseline, not the kernel selection for a
+required-agent release. The [delivery guide](delivery/README.md) binds that
+separate candidate to an explicit binary hash and source revision.
 
-# 3. Drive the plugin under test. Every plugin smoke test reads:
-#    - $CHIO_TRUST_URL     (http://127.0.0.1:8940)
-#    - $CHIO_MCP_URL       (http://127.0.0.1:8931)
-#    - $CHIO_TOKEN         (bearer for both services)
-#    - $CHIO_POLICY        (path to policy/canonical.yaml)
-#    - $CHIO_BIN           (absolute path to chio)
-#    - $CHIO_HARNESS_DIR   (this directory)
+</details>
 
-# 4. Tear everything down.
+Start the services and load their client configuration:
+
+```bash
+test -x "${CHIO_BIN:?Set CHIO_BIN to the selected kernel executable}" && \
+  bash bin/start.sh && source bin/env.sh
+```
+
+A fresh start prints `READY` after the trust health check and MCP initialization
+succeed. `bin/env.sh` exports `CHIO_TRUST_URL`, `CHIO_MCP_URL`, `CHIO_TOKEN`,
+`CHIO_POLICY`, `CHIO_BIN` and `CHIO_HARNESS_DIR` for your client tests. Keep the
+fixture token private.
+
+Check both services again, then stop them when your tests finish:
+
+```bash
+bash bin/wait-ready.sh
+# Run your integration's client tests against the exported endpoints.
 bash bin/stop.sh
 ```
 
-`start.sh` is idempotent: re-invoking it while the daemons are alive
-prints `READY` and exits 0 without restarting. To force a clean start,
-call `stop.sh` first.
+`var/` holds this clone's token, PID files, logs and durable databases. Stop uses
+those PID files and retains logs and databases. Use the same disposable clone
+for startup and shutdown. Preserve diagnostics before a new start, which
+truncates the logs. Repeated `start.sh` calls reuse live recorded processes; use
+`wait-ready.sh` to recheck health. A failed start can leave a process running, so
+run `stop.sh` from that clone after inspecting the failure.
 
-## Layout
+For different ports, set `CHIO_TRUST_ADDR` and `CHIO_MCP_ADDR` before startup,
+and the matching `CHIO_TRUST_URL` and `CHIO_MCP_URL` before sourcing `env.sh`.
+Keep them on loopback. `CHIO_POLICY` selects an alternate policy, and
+`CHIO_READY_TIMEOUT_SECS` controls the final readiness probe.
 
+## How it works
+
+```mermaid
+flowchart LR
+    Client["Your integration or bridge tests"] -->|authenticated HTTP| Trust["Chio trust service<br/>127.0.0.1:8940"]
+    Client -->|MCP over HTTP| Edge["Chio MCP participant<br/>127.0.0.1:8931"]
+    Edge -->|admission via control URL| Trust
+    Edge -->|policy-gated stdio calls| Tools["hello-mcp<br/>Node.js subprocess"]
+    Trust --> Owner["var/<br/>admission, authority, receipts"]
+    Edge --> Sessions["var/mcp-sessions.sqlite"]
 ```
-bin/
-  start.sh        spins trust + edge, waits for readiness
-  stop.sh         kills PIDs, removes pid files, keeps logs
-  wait-ready.sh   polls /health and MCP initialize until both 200
-  env.sh          source-able CHIO_* env vars
 
-policy/
-  canonical.yaml     HushSpec 0.1.0 reference policy for happy-path tests
-  tiny-budget.yaml   same shape with a 3-invocation velocity window
-  extensions.yaml    extensions.chio.* passthrough exercises
+The trust process owns durable admission, authority and receipts. The MCP
+participant uses that remote control URL and keeps its own session identity.
+These roles must share the same admission owner; mixing separate budget or
+revocation stores would test a different configuration.
 
-hello-mcp/
-  server.mjs         stdio MCP server with echo / delete_file / paid_action
-  package.json       pinned to @modelcontextprotocol/sdk 0.6.0 (see caveat)
+The tool server runs as a local subprocess. This harness provides real service
+behavior for client compatibility tests; host isolation belongs to each
+integration's supported execution mode.
 
-var/                 runtime state (pid files, logs, tokens) — gitignored
+## Test fixtures
+
+| Tool | Behavior |
+|---|---|
+| `echo({ msg })` | Returns the supplied message. |
+| `delete_file({ path })` | Attempts a real filesystem unlink; the canonical policy blocks this tool. |
+| `paid_action({ usd })` | Returns a simulated charge and fixture receipt ID. No payment is made. |
+
+The [canonical policy](policy/canonical.yaml) allows `echo` and `paid_action`,
+blocks other tools, and sets an invocation limit. The
+[tiny-budget policy](policy/tiny-budget.yaml) lowers that limit to three calls
+per window; it does not test dollar-denominated spending. The
+[extensions policy](policy/extensions.yaml) provides additional policy fixtures.
+Cost-ceiling and approval-threshold tests need purpose-built capabilities and
+requests; the canonical fixture does not cover those paths.
+
+Use disposable sentinel files for denial tests and independently compare their
+bytes after the request. An `echo` result, tool error, simulated payment ID or
+returned denial is not itself a verified kernel receipt. Downstream tests should
+verify the intended caller, request, signer and result, alongside resource effects.
+
+The server's [manifest](hello-mcp/package.json) and [lockfile](hello-mcp/bun.lock)
+pin MCP SDK `0.6.0`. Treat a change to that pin as a protocol-compatibility change
+and test initialization and tool calls against the selected kernel.
+
+## Assemble a candidate bundle
+
+The [delivery guide](delivery/README.md) covers a separate installation workflow:
+
+1. Select exact kernel, adapter, SDK, wheel and OCI image inputs.
+2. Verify their identities and assemble a new immutable directory.
+3. Create an archive, extract it into a fresh location, and verify the installed bytes.
+
+The assembler supplies `manifest.json`, `SHA256SUMS` and a standalone `verify.py`.
+Its [template](delivery/candidate-template.json) requires an explicit final kernel
+binding and keeps publication and all six host acceptance fields unresolved.
+It never obtains missing artifacts or publishes a release automatically.
+
+See the [operator runbook](delivery/OPERATOR.md) for host installation,
+authorization, recovery, upgrade and removal, and the
+[resource-owner guide](delivery/RESOURCE-OWNER.md) for the protected filesystem
+service. The [local candidate record](delivery/evidence/2026-09-10/static-docs-successor/README.md)
+identifies the tested bundle and its limits. Saved OCI archives support delivery
+without a private registry; their availability still needs a verified public
+release path.
+
+## Development
+
+The harness is Bash, a small Node.js MCP server and a Python bundle assembler.
+There is no TypeScript build step. Safe local source checks are:
+
+```bash
+bash -n bin/start.sh bin/env.sh bin/wait-ready.sh bin/stop.sh
+node --check hello-mcp/server.mjs
+python3 -m unittest discover -s delivery/tests -v
 ```
 
-## MCP SDK pin caveat
+[CI](.github/workflows/ci.yml) runs the delivery integrity suite and builds the
+pinned kernel for service startup, environment, readiness and shutdown checks.
+Those jobs have different scope from real-host acceptance or release provenance.
 
-`chio mcp serve-http` forwards the client's
-`capabilities.sampling.tools: true` down to the wrapped MCP subprocess.
-`@modelcontextprotocol/sdk >= 0.7` rejects that input as "unknown
-field" and returns JSON-RPC -32603 on initialize. We pin `0.6.0` here
-so the edge boots cleanly; once chio's adapter gates this behind a
-protocol negotiation, the pin can relax. See
-`/Users/connor/Medica/backbay/standalone/arc/crates/chio-mcp-adapter/src/transport.rs:982`
-for the forwarded capabilities shape.
+The legacy `prep-release` script removes `var/` and may start services;
+`verify-release` also needs a separate verification library. They are not part of
+the quickstart or the standalone candidate assembler. Review them before use in
+a dedicated release workspace.
 
-## Canonical policy caveats
-
-The canonical policy intentionally avoids two fields that otherwise
-make the happy path impossible against a bare `chio check` / `chio mcp
-serve-http`:
-
-- **`human_in_loop.approve_above`** — compiles to
-  `Constraint::RequireApprovalAbove` on every tool grant, which
-  fail-closes when a `governed_intent` is absent. Smoke tests that
-  need to exercise HIL threshold semantics must mint their own policy
-  and drive chio through `bridge.check({ governed_intent: ... })`
-  (not yet surfaced on `@chio/bridge@0.1.0` — see VERIFY.md).
-- **`rules.velocity.max_spend_per_window`** — the velocity guard
-  fail-closes when the matched grant lacks `max_cost_per_invocation`.
-  `chio check`'s synthetic grant does not carry that field, so the
-  canonical policy uses `max_invocations_per_window` instead. The
-  spend-window path exists in the Rust guard but requires a policy +
-  capability combo that carries per-tool cost ceilings.
-
-Both limits are tracked in the parent VERIFY.md so the wave-2
-plugin-rewrite agents can code around them.
-
-## What to assert in downstream smoke tests
-
-Minimum coverage every plugin smoke test (ST.2.x) must assert:
-
-1. `bond({ policyPath: "$CHIO_POLICY" })` returns a `did:chio:` subject
-   and a non-empty `capabilityId`.
-2. `check({ tool: "echo", params: { msg: "hi" } })` returns
-   `decision: "allow"`.
-3. `check({ tool: "delete_file", params: { path: "/etc/hosts" } })`
-   returns `decision: "deny"`.
-4. At least one receipt is returned from
-   `receipts({ since: T0 })` after a successful echo call, and every
-   receipt passes `verifyReceipt()` (ed25519 signature valid).
-5. Plugin-specific CLI surface (`claude chio bond`, `opencode plugin
-   chio ...`, `codex chio ...`) is exercised end-to-end against the
-   running harness — no stubbed `ChioBridge` allowed.
-
-See `/tmp/chio-debate/SMOKE_HARNESS_VERIFY.md` for the reference run.
-
-## CI
-
-[![ci](https://github.com/owner/chio-test-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/owner/chio-test-harness/actions/workflows/ci.yml)
-
-Workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml). Runs lint/typecheck (non-blocking in Wave 5.1), unit tests, and a chio-backed smoke pass. Swap `owner/...` once the GitHub org is live.
-
-## Durable owner compatibility
-
-The candidate kernel requires one durable admission owner. `start.sh` launches
-the trust process with `var/admission.sqlite`, `var/authority.sqlite`, and
-`var/receipts.sqlite`. It waits for authenticated trust readiness before starting
-the MCP participant with `--control-url` and its own
-`var/mcp-sessions.sqlite` identity. Split local budget/revocation stores must not
-be combined with this durable owner, and the participant must not combine local
-receipt/authority flags with the remote control URL.
-
-Fixture credentials are private files under `var/` and are passed through child
-environments, not command arguments. Run in a disposable clone/profile and set
-`CHIO_BIN` to the exact qualified artifact; the version string alone is not an
-artifact identity. Do not point delete tests at system files or normal user
-state. Create a disposable sentinel, ask the kernel to deny deletion, and check
-the original bytes independently. This proves the observed resource survived;
-a returned denial alone does not prove prevention.
-
-Startup was verified on 2026-09-09 using source
-`d8c5f53705173e614a853bad6c0a85acfdf1212b` and kernel SHA-256
-`33dd1dea21a4ca5ecddeab4f30f6b06b0b90c513f0987aef552b0633d9da1e25`.
-The trust and MCP services reached readiness, explicit echo execution returned
-request-bound signed evidence, and receipt queries returned that work. Remaining
-consumer API compatibility failures are independent release blockers; this
-startup repair is not full bridge or host acceptance.
+[Chio kernel and protocol](https://github.com/backbay-labs/chio) ·
+[TypeScript bridge](https://github.com/backbay-labs/chio-bridge) ·
+[Delivery instructions](delivery/README.md) · [Apache-2.0](LICENSE)
