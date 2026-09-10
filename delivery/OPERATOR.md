@@ -282,9 +282,14 @@ node "$CHIO_INSTALL/operator-bridge/node_modules/@chio/bridge/dist/gateway-opera
 
 Missing, pending, invalid, mismatched or unverifiable completion remains unknown.
 No step renews expired/revoked authority or redispatches the original action.
-A failed acknowledgement retains the fence. Never clear a journal, replace its
-identity, or create a replacement session to hide uncertainty. Retain state and
-request operator reconciliation when the resource lacks a trustworthy outcome.
+A session can idle-expire before its delegated credential expires. Credential
+expiry alone does not establish that the retained session is live. If the owner
+records the original session as expired, preserve that tombstone, journal and
+resource observation; a fresh session is independent new work, not recovery of
+the original authority. A failed acknowledgement retains the fence. Never clear
+a journal, replace its identity, or create a replacement session to hide
+uncertainty. Retain state and request operator reconciliation when the resource
+lacks a trustworthy outcome.
 
 ## Upgrade, restart and remove
 

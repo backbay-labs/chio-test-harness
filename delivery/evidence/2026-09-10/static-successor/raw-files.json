@@ -1,0 +1,278 @@
+[
+  {
+    "path": "archive.stderr.txt.gz",
+    "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sourceBytes": 0,
+    "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837"
+  },
+  {
+    "path": "archive.stdout.json.gz",
+    "sourceSha256": "57337c53cddde56d85927bd759e39658312836667efcabd8345cbdb67770a5a8",
+    "sourceBytes": 197,
+    "sha256": "53efbc76a156ff50f82c00677c6a332032c24cf0fbc531d76f3f45e851078c03"
+  },
+  {
+    "path": "installed-identity.json.gz",
+    "sourceSha256": "c31f6c19297e8b76e226a642d6ea5b0ea7b3549c018473878b41c6c49c55396c",
+    "sourceBytes": 249,
+    "sha256": "e68bb4ea011954458435b2531f3eb6cfd613375f4399dc7b486db0d691791b30"
+  },
+  {
+    "path": "identity.json.gz",
+    "sourceSha256": "77614241f8efcfedaf15f0da035fa60a72be979f6341b1ae539f07fa8b094bfb",
+    "sourceBytes": 1702,
+    "sha256": "0ebfefb55b8ba15e0abdc9a2860ad319add2781f3d00a5863fcf42d6e8a8beda"
+  },
+  {
+    "path": "commands.json.gz",
+    "sourceSha256": "b4933aff0a413cb457638f9831f835cb2059493227255efb084eab56d3f82f5f",
+    "sourceBytes": 1561,
+    "sha256": "656d805e8829f33bde64392290fdb3f74024dc20c1ddcbed5a202f8862a18cc0"
+  },
+  {
+    "path": "prepare.stdout.txt.gz",
+    "sourceSha256": "7e06e8c1c443fc54e91ce2f5da174b9e025cfd89c488b08f2cf09da5bc17465f",
+    "sourceBytes": 136,
+    "sha256": "2d54c3df956f37924d69dd906ae7f4c0cf09c3cb751f56b15348a9979253ebd9"
+  },
+  {
+    "path": "cold-version.stdout.txt.gz",
+    "sourceSha256": "8a64cf652e710db1eb0458fe25526b27c263df44c6cec5903bbfbedaafa04bc2",
+    "sourceBytes": 20,
+    "sha256": "33481ee96579d2fcd191d0ea90f0f2b0fdc4777e8eb138d845623109fa59a81e"
+  },
+  {
+    "path": "assembly.stdout.json.gz",
+    "sourceSha256": "7ba0ff80a3fdda3ed986f8a4fc9f6024ceced0169b394c2a44b0e6477bf919c2",
+    "sourceBytes": 135,
+    "sha256": "392abaf1554aa63e371315ce237e46b884e047b45595661558f257653bc659ee"
+  },
+  {
+    "path": "extraction.stderr.txt.gz",
+    "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sourceBytes": 0,
+    "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837"
+  },
+  {
+    "path": "cold-verification.stderr.txt.gz",
+    "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sourceBytes": 0,
+    "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837"
+  },
+  {
+    "path": "owner-start.stdout.txt.gz",
+    "sourceSha256": "c820613b2ea361858701c1338ed25e545965e7dbfafdfd4a522f8f2f5d382ef7",
+    "sourceBytes": 81,
+    "sha256": "7828172b7deff85ad8abbb9c5fdf6cb9e2c5bcd3814ce9bf96060a8a4f50c0ef"
+  },
+  {
+    "path": "install.stdout.txt.gz",
+    "sourceSha256": "da13ab9d025b19c91553bc7d4c450975d3e4e36dd7c5fef6f223f8008ba39547",
+    "sourceBytes": 23,
+    "sha256": "8ad0ddcf0cdb848891fb62d303f98bb2efd39f00bd390ab35c62e8125e331069"
+  },
+  {
+    "path": "assembly.stderr.txt.gz",
+    "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sourceBytes": 0,
+    "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837"
+  },
+  {
+    "path": "cold-verification.stdout.txt.gz",
+    "sourceSha256": "8af098f7828ab205575f5639a3167f101b838f916ea2eaac5a913b2e98e604cc",
+    "sourceBytes": 109,
+    "sha256": "55481632521afa8f1dd29f2f7e05e22100a65d101524f7d779a21869da1f3413"
+  },
+  {
+    "path": "extraction.stdout.txt.gz",
+    "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sourceBytes": 0,
+    "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837"
+  },
+  {
+    "path": "install.stderr.txt.gz",
+    "sourceSha256": "41dbe01d0aca81aba3b1a2e35261214ea4be6286c4a0f38509a81428e6e90264",
+    "sourceBytes": 211,
+    "sha256": "547f89bad9a3cdfe9d4ce27463e8407d5149bc22d949f39f9b134896bf9147c8"
+  },
+  {
+    "path": "owner-start.stderr.txt.gz",
+    "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sourceBytes": 0,
+    "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837"
+  },
+  {
+    "path": "kernel-binding.json.gz",
+    "sourceSha256": "55ff10633682886154c69137065effbbf1b132d7337bf13f36b155762e64942c",
+    "sourceBytes": 232,
+    "sha256": "88a7d458307b905cc4b9b50a4ef30af10e212cec3dd817b0caa58644387348f9"
+  },
+  {
+    "path": "owner-commands.json.gz",
+    "sourceSha256": "4c6c5944822be17c03dfa95dc2b35e4c6cfcc5d0f43132b20d99f926a7642914",
+    "sourceBytes": 1842,
+    "sha256": "2642e40a00bdff90c8d4bc88f42e3280801d9d5eebafb0c3697baeefd035aaef"
+  },
+  {
+    "path": "cold-version.stderr.txt.gz",
+    "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sourceBytes": 0,
+    "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837"
+  },
+  {
+    "path": "owner-state-path.txt.gz",
+    "sourceSha256": "d79860af11bd52061f079d9b9384748d6ed2007d69a02354667eda201fafdd37",
+    "sourceBytes": 78,
+    "sha256": "d0f324d2c04a9441a6872d43d4ae128f8c006505942ad061cf03123e5639f9a6"
+  },
+  {
+    "path": "prepare.stderr.txt.gz",
+    "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sourceBytes": 0,
+    "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837"
+  },
+  {
+    "path": "run-operator-verification.py.gz",
+    "sourceSha256": "655bb9a9ce256b0645fe758d2000a65f292ff3e9194bb862e0f7e8cf34f3d4f2",
+    "sourceBytes": 4996,
+    "sha256": "f2b5fba32a825ffa045a290f4126b793fa06af5609e095b26c2dd5e6ddf9b629"
+  },
+  {
+    "path": "operator-gateway-case.mjs.gz",
+    "sourceSha256": "063a5fd61feffa00382b3589e263642546604c496529ccfb5c3db2f1b9c62322",
+    "sourceBytes": 1126,
+    "sha256": "7c93dcf9c14e06bcedfb098b674dcc5f2db3c5d1c7960038fb26f3e16f00efeb"
+  },
+  {
+    "path": "before-control.stdout.json.gz",
+    "sourceSha256": "0749e20ad3764734f4ad6daa879435d6bbc941a1c8a2c6eb5d528296ed405a97",
+    "sourceBytes": 43,
+    "sha256": "dbbb3a6678e455fdcf579b39e436dcfaa3453cc0362e694d390835c2c1be74a8"
+  },
+  {
+    "path": "before-control.stderr.txt.gz",
+    "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sourceBytes": 0,
+    "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837"
+  },
+  {
+    "path": "control.stdout.txt.gz",
+    "sourceSha256": "a672cf033b2a0b41cc84d51af7bb50a97499dc5c51083669cad7a7d7451dce46",
+    "sourceBytes": 79,
+    "sha256": "7fce97b7cde17ace65cf5b33f2ed138d859f702f068f86318fda7649076eb77e"
+  },
+  {
+    "path": "control.stderr.txt.gz",
+    "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sourceBytes": 0,
+    "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837"
+  },
+  {
+    "path": "control.json.gz",
+    "sourceSha256": "3b7b975a619210220c5e927fbb6832042c253ca4911cfc3322578b4ab3086c37",
+    "sourceBytes": 4842,
+    "sha256": "24e901452b17dca749d8d6cc5a5ff2f12ebda89c278825d5e56715e97c0e3ae5"
+  },
+  {
+    "path": "after-control.stdout.json.gz",
+    "sourceSha256": "0266e416a986e513be8d960943179172cf2b373006dd40af320a1d258a57da81",
+    "sourceBytes": 434,
+    "sha256": "d1cb0a10473745d8f17d52a733e4bb33e91b5160aaa4d62e1320b37978cbceb2"
+  },
+  {
+    "path": "after-control.stderr.txt.gz",
+    "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sourceBytes": 0,
+    "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837"
+  },
+  {
+    "path": "documented-revocation.py.gz",
+    "sourceSha256": "ae7c28dfa2c752c672d811caea2cd5c1de95b0aaa0bae5537bc9ed6267c11bd7",
+    "sourceBytes": 1684,
+    "sha256": "add44c117f8bf6e68d094b5652e5b2974451d3162afb083052936e16f98575cb"
+  },
+  {
+    "path": "revocation-responses.json.gz",
+    "sourceSha256": "d4274852c5f37715ddf99a4ff755aa87e2541a50f515d739a7f6d1d69615dd00",
+    "sourceBytes": 575,
+    "sha256": "b9cd7f06cf95b06498ea5190b402c005020118e9a2f3c9c549167ca9a174020b"
+  },
+  {
+    "path": "after-revocation.stdout.txt.gz",
+    "sourceSha256": "aacad9a91dcb322ae90ff59771a4a68c012c74a6f7cf60acf134c6e13ac54c74",
+    "sourceBytes": 96,
+    "sha256": "fafed44d170e46ade47928b906490c174b6c0d705a4516260f579d942fd40986"
+  },
+  {
+    "path": "after-revocation.stderr.txt.gz",
+    "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sourceBytes": 0,
+    "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837"
+  },
+  {
+    "path": "after-revocation.json.gz",
+    "sourceSha256": "e85a2d78514867a54340dd43fd8ac4f3ce6fb83cbb368dbe0b552fb7b83fb02f",
+    "sourceBytes": 394,
+    "sha256": "ca9be3ec306d0f54d74d766b527783cda84eab8f9181478f6f37c21d38ca8a82"
+  },
+  {
+    "path": "after-revocation-observer.stdout.json.gz",
+    "sourceSha256": "0266e416a986e513be8d960943179172cf2b373006dd40af320a1d258a57da81",
+    "sourceBytes": 434,
+    "sha256": "d1cb0a10473745d8f17d52a733e4bb33e91b5160aaa4d62e1320b37978cbceb2"
+  },
+  {
+    "path": "after-revocation-observer.stderr.txt.gz",
+    "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sourceBytes": 0,
+    "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837"
+  },
+  {
+    "path": "operation-commands.json.gz",
+    "sourceSha256": "13dd4126be2cfb2950a311693d9a64ab83210e8f7c94f6956d92b9f363607bba",
+    "sourceBytes": 4489,
+    "sha256": "e4a3009e4ce2a2a47f1e4df6b376c56fc2dbb76a53ba8a249965c500dbf11dbf"
+  },
+  {
+    "path": "operation-result.json.gz",
+    "sourceSha256": "0658345a14002add4ed66d30a717e57ce5858be50263393267733d5227d8849c",
+    "sourceBytes": 861,
+    "sha256": "76de266ddf61fae1c78ca000e7e0e524035451ae09fa37cabdc4fd80e31a0216"
+  },
+  {
+    "path": "owner-stop.stdout.txt.gz",
+    "sourceSha256": "3f19de6969ec8dc13c43ac6f7d88bf9fca055b9e02093d978971aacf6285dff0",
+    "sourceBytes": 67,
+    "sha256": "fefcdc05ea28b1e156417e2872d5344baac235d058fb54b9ea68b38b8b2f46e7"
+  },
+  {
+    "path": "owner-stop.stderr.txt.gz",
+    "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sourceBytes": 0,
+    "sha256": "f1b651238a58fe290baec6c5e32f3bdb1943dd2bd582f02569231f7a757c7837"
+  },
+  {
+    "path": "owner-stop.json.gz",
+    "sourceSha256": "f3da1b47ed0fbc887f78d0d3982e283a67ec1b07636c7cd4856826f263f59d78",
+    "sourceBytes": 269,
+    "sha256": "1395fb16e81330a215b798b97cec5dd12630fd0033d5d15008ef1101e1bc5513"
+  },
+  {
+    "path": "installed-bundle-manifest.json.gz",
+    "sourceSha256": "f01aa36b47be4e8a557f205966a5570476fd81a2f930e738c92ef468735fe37c",
+    "sourceBytes": 13848,
+    "sha256": "17ab6466ee04b112b0531db1ba995be8decb5c41160fe2c6eb53aa8302af7219"
+  },
+  {
+    "path": "installed-bundle-SHA256SUMS.gz",
+    "sourceSha256": "1807d94b0754b2d7359ab7fbd2838c88aeb631d6cc0f4158cdb06d6de63a00d2",
+    "sourceBytes": 5410,
+    "sha256": "ef5f88e4536d4d7fb4effdece563f32665b526f61e6b39d259e4b2c31610c309"
+  },
+  {
+    "path": "installed-bundle-README.md.gz",
+    "sourceSha256": "7be4ec6cca940e4fad4a93bae7003fb8f2080673b1e3a42f3e0bb8e1f4955721",
+    "sourceBytes": 21305,
+    "sha256": "6313db36226d185e88d10bb9ec64b22298446a1edc342d64331d0357b561b49d"
+  }
+]
