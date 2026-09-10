@@ -1,0 +1,18 @@
+test_archives_are_reproducible_and_match_every_selected_file (test_bundle.DeliveryTests.test_archives_are_reproducible_and_match_every_selected_file) ... ok
+test_duplicate_inventory_destinations_are_refused (test_bundle.DeliveryTests.test_duplicate_inventory_destinations_are_refused) ... ok
+test_duplicate_json_keys_are_refused (test_bundle.DeliveryTests.test_duplicate_json_keys_are_refused) ... ok
+test_existing_output_is_preserved (test_bundle.DeliveryTests.test_existing_output_is_preserved) ... ok
+test_image_index_must_bind_selected_digest (test_bundle.DeliveryTests.test_image_index_must_bind_selected_digest) ... ok
+test_modified_bundle_bytes_are_refused (test_bundle.DeliveryTests.test_modified_bundle_bytes_are_refused) ... ok
+test_modified_input_and_wrong_size_are_refused (test_bundle.DeliveryTests.test_modified_input_and_wrong_size_are_refused) ... ok
+test_old_version_and_wrong_target_are_not_compatible_bindings (test_bundle.DeliveryTests.test_old_version_and_wrong_target_are_not_compatible_bindings) ... ok
+test_paths_cannot_escape_or_alias_input_root (test_bundle.DeliveryTests.test_paths_cannot_escape_or_alias_input_root) ... ok
+test_pending_kernel_verifies_independent_inputs_but_cannot_assemble (test_bundle.DeliveryTests.test_pending_kernel_verifies_independent_inputs_but_cannot_assemble) ... ok
+test_repeated_assembly_is_identical_and_preserves_unaccepted_state (test_bundle.DeliveryTests.test_repeated_assembly_is_identical_and_preserves_unaccepted_state) ... ok
+test_self_asserted_acceptance_or_publication_is_refused (test_bundle.DeliveryTests.test_self_asserted_acceptance_or_publication_is_refused) ... ok
+test_unlisted_private_state_is_refused (test_bundle.DeliveryTests.test_unlisted_private_state_is_refused) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.068s
+
+OK

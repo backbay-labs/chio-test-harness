@@ -1,0 +1,59 @@
+{
+  "recordedAt": "2026-09-10T06:44:08.563648+00:00",
+  "results": [
+    {
+      "case": "operator-bridge-empty-cache-offline-install",
+      "command": [
+        "npm",
+        "install",
+        "--prefix",
+        "/tmp/chio-successor-delivery-install-check-20260910/operator-bridge",
+        "--cache",
+        "/tmp/chio-successor-delivery-install-check-20260910/empty-cache",
+        "--offline",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund",
+        "/Users/connor/.local/share/chio-required-candidates/20260909/packages/chio-bridge-operator-0.3.0-02a0e4ad4e61.tgz"
+      ],
+      "exitCode": 0
+    },
+    {
+      "case": "operator-bridge-installed-archive-bytes",
+      "archiveSha256": "02a0e4ad4e61ffb989302cae8774a9ae9ab8f647473f1926d1e671673169a37b",
+      "verifiedRegularFiles": 1056,
+      "mismatches": []
+    },
+    {
+      "case": "existing-image-identity-inspection",
+      "command": [
+        "docker",
+        "image",
+        "inspect",
+        "--format",
+        "{{json .Id}} {{json .Os}} {{json .Architecture}}",
+        "sha256:188cb84d5d0bb4063d4ce5a3b9c3832445a5acda5604911cda80a9136d1850a0"
+      ],
+      "exitCode": 0,
+      "stdout": "\"sha256:188cb84d5d0bb4063d4ce5a3b9c3832445a5acda5604911cda80a9136d1850a0\" \"linux\" \"arm64\"\n",
+      "stderr": "",
+      "scope": "Images already present; this is not a pristine Docker-engine load test."
+    },
+    {
+      "case": "existing-image-identity-inspection",
+      "command": [
+        "docker",
+        "image",
+        "inspect",
+        "--format",
+        "{{json .Id}} {{json .Os}} {{json .Architecture}}",
+        "sha256:7f925d68ced724f4a6314ab76dc117e9000515ba62149ee971a11c510be6637f"
+      ],
+      "exitCode": 0,
+      "stdout": "\"sha256:7f925d68ced724f4a6314ab76dc117e9000515ba62149ee971a11c510be6637f\" \"linux\" \"arm64\"\n",
+      "stderr": "",
+      "scope": "Images already present; this is not a pristine Docker-engine load test."
+    }
+  ],
+  "acceptance": "No real host or public installation acceptance claimed."
+}

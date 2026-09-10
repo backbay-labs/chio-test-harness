@@ -6,48 +6,124 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
+  delivery-integrity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - name: Verify candidate assembly integrity controls
+        run: |
+          python3 -m unittest discover -s delivery/tests -v
+          python3 -m py_compile delivery/bundle.py
+
   self-test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      CARGO_BUILD_JOBS: 2
+      CARGO_INCREMENTAL: 0
+      TZ: UTC
+      LC_ALL: C
     steps:
       - name: Checkout chio-test-harness
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
+          ref: ${{ github.sha }}
           path: chio-test-harness
+          persist-credentials: false
 
-      - name: Checkout arc (chio source)
-        uses: actions/checkout@v4
+      - name: Checkout exact kernel source
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
-          # Placeholder: replace owner/arc once the GitHub org is live.
-          repository: owner/arc
-          path: arc
-          ref: main
+          repository: backbay-labs/chio
+          ref: d8c5f53705173e614a853bad6c0a85acfdf1212b
+          path: kernel
+          persist-credentials: false
 
-      - name: Setup chio
-        uses: owner/chio-ci-actions/setup-chio@v0.1.0
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          mode: build
-          arc-path: arc
+          node-version: '22.19.0'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        with:
+          bun-version: '1.3.3'
+
+      - name: Install kernel build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes protobuf-compiler pkg-config libssl-dev python3 jq openssl
+
+      - name: Install pinned Rust toolchain
+        working-directory: kernel
+        run: |
+          rustup toolchain install 1.94.1 --profile minimal --component clippy --component rustfmt
+          rustup show active-toolchain
+
+      - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32
+        with:
+          workspaces: kernel -> target
+
+      - name: Build exact kernel
+        working-directory: kernel
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = d8c5f53705173e614a853bad6c0a85acfdf1212b
+          cargo build --locked -p chio-cli --bin chio
+          echo "CHIO_BIN=${PWD}/target/debug/chio" >> "${GITHUB_ENV}"
+          sha256sum target/debug/chio
 
       - name: Install hello-mcp deps
         working-directory: chio-test-harness/hello-mcp
-        run: bun install --frozen-lockfile
+        run: bun install --frozen-lockfile --ignore-scripts
+
+      - name: Prepare isolated runtime profile
+        run: |
+          set -euo pipefail
+          umask 077
+          profile_dir="$(mktemp -d "${RUNNER_TEMP}/chio-harness-home.XXXXXX")"
+          mkdir -p "${profile_dir}/config" "${profile_dir}/data" "${profile_dir}/state"
+          echo "CHIO_HARNESS_TEST_HOME=${profile_dir}" >> "${GITHUB_ENV}"
 
       - name: Start daemons
         working-directory: chio-test-harness
+        env:
+          HOME: ${{ env.CHIO_HARNESS_TEST_HOME }}
+          XDG_CONFIG_HOME: ${{ env.CHIO_HARNESS_TEST_HOME }}/config
+          XDG_DATA_HOME: ${{ env.CHIO_HARNESS_TEST_HOME }}/data
+          XDG_STATE_HOME: ${{ env.CHIO_HARNESS_TEST_HOME }}/state
         run: bash bin/start.sh
 
       - name: Verify READY (idempotent re-invoke)
         working-directory: chio-test-harness
+        env:
+          HOME: ${{ env.CHIO_HARNESS_TEST_HOME }}
+          XDG_CONFIG_HOME: ${{ env.CHIO_HARNESS_TEST_HOME }}/config
+          XDG_DATA_HOME: ${{ env.CHIO_HARNESS_TEST_HOME }}/data
+          XDG_STATE_HOME: ${{ env.CHIO_HARNESS_TEST_HOME }}/state
         run: |
+          set -euo pipefail
           out="$(bash bin/start.sh)"
           echo "${out}"
-          grep -q READY <<<"${out}" || exit 1
+          grep -q '^READY$' <<<"${out}"
 
       - name: Probe env.sh
         working-directory: chio-test-harness
+        env:
+          HOME: ${{ env.CHIO_HARNESS_TEST_HOME }}
         run: |
+          set -euo pipefail
           # shellcheck disable=SC1091
           source bin/env.sh
           : "${CHIO_TRUST_URL:?}"
@@ -59,18 +135,61 @@ jobs:
       - name: Health check
         working-directory: chio-test-harness
         run: |
-          curl -fsS "http://127.0.0.1:8940/health" >/dev/null
-          echo "trust plane healthy"
+          set -euo pipefail
+          # shellcheck disable=SC1091
+          source bin/env.sh
+          python3 - <<'PY'
+          import os
+          import urllib.request
+          request = urllib.request.Request(
+              os.environ["CHIO_TRUST_URL"] + "/health",
+              headers={"Authorization": "Bearer " + os.environ["CHIO_TOKEN"]},
+          )
+          with urllib.request.urlopen(request, timeout=5) as response:
+              assert response.status == 200, "trust health failed"
+          print("trust plane healthy")
+          PY
 
       - name: Stop daemons
         if: always()
-        working-directory: chio-test-harness
-        run: bash bin/stop.sh || true
+        run: |
+          if [[ -f chio-test-harness/bin/stop.sh ]]; then
+            bash chio-test-harness/bin/stop.sh
+          fi
 
-      - name: Upload var/ on failure
+      - name: Collect safe diagnostic logs
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import re
+
+          source = Path("chio-test-harness/var")
+          destination = Path(os.environ["RUNNER_TEMP"]) / "harness-safe-logs"
+          destination.mkdir(mode=0o700, exist_ok=True)
+          secrets = []
+          for path in [source / "trust.token", *source.glob("*.seed")]:
+              if path.is_file() and not path.is_symlink():
+                  value = path.read_bytes()
+                  secrets.extend([value.hex(), value.decode("utf-8", errors="ignore").strip()])
+          for name in ["trust.log", "mcp.log"]:
+              path = source / name
+              if not path.is_file() or path.is_symlink():
+                  continue
+              text = path.read_text(errors="replace")[-5_000_000:]
+              for secret in secrets:
+                  if secret:
+                      text = text.replace(secret, "[REDACTED]")
+              text = re.sub(r"(?i)Bearer\s+[^\s\"']+", "Bearer [REDACTED]", text)
+              (destination / name).write_text(text)
+          PY
+
+      - name: Upload diagnostic logs on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: harness-var
-          path: chio-test-harness/var
+          name: harness-logs
+          path: ${{ runner.temp }}/harness-safe-logs/*.log
           if-no-files-found: ignore
+          retention-days: 14
