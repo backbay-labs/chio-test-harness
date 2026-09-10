@@ -23,7 +23,8 @@
     "hello-mcp",
     "scripts",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "docs/assets"
   ],
   "engines": {
     "node": ">=22"
